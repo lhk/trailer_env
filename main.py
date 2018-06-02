@@ -2,59 +2,45 @@ import numpy as np
 
 import pygame
 import sys
+import colors
 from pygame.locals import *
+from utils import rotate
+import params
+from environment import Environment
 
 pygame.init()
-fpsClock = pygame.time.Clock()
-
-screen_size = (640, 480)
-window = pygame.display.set_mode(screen_size)
+clock = pygame.time.Clock()
+window = pygame.display.set_mode(params.screen_size)
 pygame.display.set_caption("Pygame cheat sheet")
-
-redColor = pygame.Color(255, 0, 0)
-greenColor = pygame.Color(0, 255, 0)
-blueColor = pygame.Color(0, 0, 255)
-whiteColor = pygame.Color(255, 255, 255)
-blackColor = pygame.Color(0, 0, 0)
 
 mouse_x, mouse_y = 0, 0
 
-font = pygame.font.Font(None, 32)
-msg = "Hello world"
-
-fps = 30
+env = Environment(params.screen_size, params.car_size, params.num_obstacles)
 
 while True:
-    window.fill(whiteColor)
 
-    pygame.draw.circle(window, blueColor, (300, 50), 20, 0)
+    frame = env.render(return_numpy=False)
+    window.blit(frame, (0,0))
 
-    msg_surface = font.render(msg, False, blueColor)
-    msg_rect = msg_surface.get_rect()
-    msg_rect.topleft = (mouse_x, mouse_y)
-    window.blit(msg_surface, msg_rect)
-
-    # get numpy surface
-    np_arr = pygame.surfarray.array3d(window)
+    acceleration = 0
+    steering_angle = 0
 
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-        elif event.type == MOUSEMOTION:
-            mouse_x, mouse_y = event.pos
 
-        elif event.type == KEYDOWN:
-            if event.key == K_UP:
-                fps += 10
-                fps = min(fps, 120)
-            elif event.key == K_DOWN:
-                fps-= 10
-                fps = max(fps, 10)
-            elif event.key == K_SPACE:
-                fps = 60
+    keys = pygame.key.get_pressed()
+    if keys[K_UP]:
+        acceleration = 1
+    elif keys[K_DOWN]:
+        acceleration = -1
+    if keys[K_LEFT]:
+        steering_angle=-1
+    elif keys[K_RIGHT]:
+        steering_angle = 1
 
-            print(fps)
-
+    env.make_action(acceleration, steering_angle)
     pygame.display.update()
-    fpsClock.tick(120)
+
+    clock.tick(30)
