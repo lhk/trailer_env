@@ -43,4 +43,4 @@ while True:
     env.make_action(acceleration, steering_angle)
     pygame.display.update()
 
-    clock.tick(30)
+    clock.tick(10)
